@@ -35,7 +35,7 @@ const Header = () => {
             ﷽
           </div>
           <span className="gradient-text" style={{ fontSize: "18px", fontWeight: "600" }}>
-            e-Quran
+            SurahFlow
           </span>
         </Link>
 

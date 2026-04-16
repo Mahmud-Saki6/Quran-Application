@@ -9,7 +9,7 @@ import { PREHYDRATION_SCRIPT } from "@/lib/prehydration";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "e-Quran | Quran Reader",
+  title: "SurahFlow",
   description:
     "A calm, luminous reading experience with static surah pages, verse search, and personalized reading settings.",
 };
