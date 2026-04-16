@@ -9,9 +9,11 @@ import { PREHYDRATION_SCRIPT } from "@/lib/prehydration";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "SurahFlow",
-  description:
-    "A calm, luminous reading experience with static surah pages, verse search, and personalized reading settings.",
+  title: {
+    default: "SurahFlow - The Holy Quran",
+    template: "%s | SurahFlow",
+  },
+  description: "Read, reflect, and search across the Holy Quran",
 };
 
 const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {

@@ -30,12 +30,12 @@ export const generateMetadata = async ({
 
   if (!surah) {
     return {
-      title: "Surah not found | e-Quran",
+      title: "Surah not found",
     };
   }
 
   return {
-    title: `${surah.englishName} | e-Quran`,
+    title: surah.englishName,
     description: `Read Surah ${surah.englishName} with Arabic text and English translation in a glassmorphism Quran reader.`,
   };
 };
