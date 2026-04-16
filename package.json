@@ -1,0 +1,10 @@
+{
+  "name": "quran-app",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "start": "npm run start --prefix frontend",
+    "install:all": "npm install --prefix frontend"
+  }
+}

@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+
+# Build-time generated Quran data (regenerated during build)
+frontend/lib/generated/surahs.json
+frontend/lib/generated/surah-details.json
+frontend/lib/generated/search-index.json
+
+# Environment variables
+.env
+.env.local
+.env*.local
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
+
+# TypeScript
+*.tsbuildinfo

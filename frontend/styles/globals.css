@@ -1,0 +1,619 @@
+@import "@fontsource/amiri";
+@import "@fontsource/noto-naskh-arabic";
+@import "@fontsource/scheherazade-new";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══ Light — Noor (default) ═════════════════════════════════════════════ */
+:root {
+  --arabic-font-family: "Scheherazade New", serif;
+  --arabic-font-size: 24px;
+  --translation-font-size: 16px;
+  --font-arabic: var(--arabic-font-family);
+
+  --bg-deep: #f5f0e8;
+  --bg-surface: #fff9f0;
+  --bg-card: rgba(255, 248, 235, 0.85);
+  --bg-card-hover: rgba(255, 248, 235, 0.98);
+
+  --sacred-gold: #b8860b;
+  --sacred-gold-light: #daa520;
+  --sacred-gold-dim: rgba(184, 134, 11, 0.10);
+  --sacred-gold-glow: rgba(184, 134, 11, 0.18);
+
+  --sacred-green: #4a6b5d;
+  --sacred-green-light: #6b8e7b;
+  --sacred-green-dim: rgba(74, 107, 93, 0.12);
+
+  --sacred-ruby: #9b5e3c;
+  --sacred-ruby-light: #b87a56;
+  --sacred-ruby-dim: rgba(155, 94, 60, 0.12);
+
+  --text-primary: #2c2418;
+  --text-secondary: #5c503c;
+  --text-muted: #8b7d6b;
+
+  --border-subtle: rgba(184, 134, 11, 0.15);
+  --border-mid: rgba(184, 134, 11, 0.25);
+  --border-accent: rgba(184, 134, 11, 0.45);
+
+  --tone-gold-border: rgba(184, 134, 11, 0.28);
+  --tone-ruby-border: rgba(155, 94, 60, 0.28);
+  --tone-sage-border: rgba(74, 107, 93, 0.28);
+
+  --gradient-gold-green: linear-gradient(135deg, #daa520 0%, #4a6b5d 100%);
+  --gradient-gold-ruby: linear-gradient(135deg, #daa520 0%, #9b5e3c 100%);
+  --gradient-warm: linear-gradient(135deg, #f5f0e8 0%, #fff9f0 100%);
+
+  --accent-teal: var(--sacred-gold-light);
+  --accent-teal-glow: var(--sacred-gold-glow);
+  --accent-amber: var(--sacred-ruby-light);
+  --accent-purple: var(--sacred-green);
+
+  --body-bg: linear-gradient(135deg, #f5f0e8 0%, #fff5e6 50%, #f0ebe1 100%);
+  --body-overlay: radial-gradient(
+    circle at 20% 30%,
+    rgba(218, 165, 32, 0.08) 0%,
+    transparent 70%
+  );
+
+  --focus-ring: rgba(184, 134, 11, 0.55);
+  --focus-offset: #f5f0e8;
+
+  --header-bg: rgba(245, 240, 232, 0.92);
+  --header-border: var(--border-subtle);
+  --header-inset: rgba(255, 252, 245, 0.8);
+
+  --sidebar-bg: rgba(255, 249, 240, 0.97);
+  --sidebar-shadow: -8px 0 40px rgba(44, 36, 24, 0.08);
+
+  --glass-panel: rgba(255, 252, 245, 0.72);
+  --glass-shadow: 0 4px 24px rgba(44, 36, 24, 0.06);
+
+  --glass-btn: rgba(255, 248, 235, 0.85);
+  --glass-btn-hover-ring: var(--sacred-gold-dim);
+
+  /* Card hover shadows — light mode: warm gold lift */
+  --surah-base-shadow: 0 4px 20px rgba(44, 36, 24, 0.06);
+  --surah-hover-shadow:
+    0 20px 44px rgba(44, 36, 24, 0.12),
+    0 0 0 1.5px rgba(184, 134, 11, 0.35),
+    0 0 32px rgba(184, 134, 11, 0.12);
+
+  --menu-bg: rgba(255, 249, 240, 0.98);
+  --menu-inset: rgba(255, 252, 245, 0.9);
+  --menu-item-bg: rgba(255, 248, 235, 0.5);
+  --menu-item-hover: rgba(255, 248, 235, 0.85);
+
+  --backdrop-scrim: rgba(44, 36, 24, 0.35);
+
+  --verse-bg-even: rgba(255, 248, 235, 0.55);
+  --verse-bg-odd: rgba(255, 252, 245, 0.78);
+  --verse-accent-even: var(--sacred-gold-dim);
+  --verse-accent-odd: var(--sacred-green-dim);
+
+  /* Card decorative top-area tint — light */
+  --card-art-bg: rgba(218, 165, 32, 0.06);
+  --card-art-bg-hover: rgba(218, 165, 32, 0.10);
+  --card-border-hover: rgba(184, 134, 11, 0.40);
+}
+
+/* ═══ Dark — glass navy + teal / purple / amber ═══════════════════════ */
+html[data-theme="dark"] {
+  --bg-deep: #0f1724;
+  --bg-surface: #1a2332;
+  /* Slightly more opaque so hover doesn't blow out */
+  --bg-card: rgba(255, 255, 255, 0.07);
+  --bg-card-hover: rgba(255, 255, 255, 0.11);
+
+  --sacred-gold: #63d3b2;
+  --sacred-gold-light: #7ae0c4;
+  --sacred-gold-dim: rgba(99, 211, 178, 0.10);
+  --sacred-gold-glow: rgba(99, 211, 178, 0.22);
+
+  --sacred-green: #a78bfa;
+  --sacred-green-light: #c4b5fd;
+  --sacred-green-dim: rgba(167, 139, 250, 0.12);
+
+  --sacred-ruby: #f0a855;
+  --sacred-ruby-light: #ffc875;
+  --sacred-ruby-dim: rgba(240, 168, 85, 0.12);
+
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.75);
+  --text-muted: rgba(255, 255, 255, 0.50);
+
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-mid: rgba(255, 255, 255, 0.16);
+  --border-accent: rgba(99, 211, 178, 0.40);
+
+  --tone-gold-border: rgba(99, 211, 178, 0.28);
+  --tone-ruby-border: rgba(240, 168, 85, 0.30);
+  --tone-sage-border: rgba(167, 139, 250, 0.30);
+
+  --gradient-gold-green: linear-gradient(135deg, #63d3b2 0%, #a78bfa 100%);
+  --gradient-gold-ruby: linear-gradient(135deg, #63d3b2 0%, #f0a855 100%);
+  --gradient-warm: linear-gradient(135deg, #0f1724 0%, #1a2332 55%, #162030 100%);
+
+  --accent-teal: #63d3b2;
+  --accent-teal-glow: rgba(99, 211, 178, 0.30);
+  --accent-amber: #f0a855;
+  --accent-purple: #a78bfa;
+
+  --body-bg: linear-gradient(135deg, #0f1724 0%, #1a2332 50%, #162030 100%);
+  --body-overlay: radial-gradient(
+    circle at 22% 28%,
+    rgba(99, 211, 178, 0.06) 0%,
+    transparent 68%
+  );
+
+  --focus-ring: rgba(99, 211, 178, 0.55);
+  --focus-offset: #0f1724;
+
+  --header-bg: rgba(10, 15, 26, 0.88);
+  --header-border: rgba(255, 255, 255, 0.09);
+  --header-inset: rgba(255, 255, 255, 0.03);
+
+  --sidebar-bg: rgba(10, 15, 26, 0.97);
+  --sidebar-shadow: -10px 0 46px rgba(0, 0, 0, 0.55);
+
+  --glass-panel: rgba(255, 255, 255, 0.07);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+
+  --glass-btn: rgba(255, 255, 255, 0.06);
+  --glass-btn-hover-ring: rgba(99, 211, 178, 0.14);
+
+  /* Card hover shadows — dark mode: deep lift + teal ring only, NO fill */
+  --surah-base-shadow: 0 4px 24px rgba(0, 0, 0, 0.30);
+  --surah-hover-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.55),
+    0 0 0 1.5px rgba(99, 211, 178, 0.35),
+    0 0 28px rgba(99, 211, 178, 0.12);
+
+  --menu-bg: rgba(15, 23, 36, 0.92);
+  --menu-inset: rgba(255, 255, 255, 0.05);
+  --menu-item-bg: rgba(255, 255, 255, 0.03);
+  --menu-item-hover: rgba(255, 255, 255, 0.06);
+
+  --backdrop-scrim: rgba(0, 0, 0, 0.55);
+
+  --verse-bg-even: rgba(255, 255, 255, 0.03);
+  --verse-bg-odd: rgba(255, 255, 255, 0.055);
+  --verse-accent-even: rgba(99, 211, 178, 0.07);
+  --verse-accent-odd: rgba(167, 139, 250, 0.07);
+
+  /* Card decorative top-area tint — dark: keep subtle, never go opaque */
+  --card-art-bg: rgba(99, 211, 178, 0.04);
+  --card-art-bg-hover: rgba(99, 211, 178, 0.06);
+  --card-border-hover: rgba(99, 211, 178, 0.38);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Smooth theme transitions (only while toggling) */
+html.theme-transition,
+html.theme-transition * {
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.25s ease,
+    box-shadow 0.35s ease,
+    transform 0.35s ease;
+}
+
+body {
+  position: relative;
+  background: var(--body-bg);
+  min-height: 100vh;
+  color: var(--text-primary);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: var(--body-overlay);
+  pointer-events: none;
+  z-index: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
+}
+
+p,
+span {
+  color: var(--text-secondary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-mid) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-mid);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--border-accent);
+}
+
+@layer base {
+  input:focus-visible,
+  button:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--focus-ring),
+      0 0 0 4px var(--focus-offset);
+  }
+}
+
+/* ─── Header + nav chrome ──────────────────────────────────────────────── */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--header-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--header-border);
+  box-shadow: 0 1px 0 var(--header-inset) inset;
+}
+
+.app-header-logo-icon {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--sacred-gold) 28%, transparent),
+    color-mix(in srgb, var(--sacred-green) 22%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--sacred-gold) 42%, transparent);
+  color: var(--sacred-gold);
+}
+
+.theme-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  background: var(--glass-btn);
+  border: 1px solid var(--border-mid);
+  color: var(--text-primary);
+}
+
+.theme-toggle-btn:hover {
+  background: var(--sacred-gold-dim);
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 3px var(--glass-btn-hover-ring);
+}
+
+.settings-tool-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+  background: var(--glass-btn);
+  border: 1px solid var(--border-mid);
+  color: var(--text-primary);
+}
+
+.settings-tool-btn:hover {
+  background: var(--sacred-gold-dim);
+  border-color: var(--border-accent);
+}
+
+@layer utilities {
+  /* ─── Glass primitives ─────────────────────────────────────────────── */
+  .glass {
+    background: var(--glass-panel);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* ─── Surah / main card ────────────────────────────────────────────── */
+  /*
+   * KEY FIX: The original .glass-card:hover used color-mix() on --sacred-gold
+   * for the box-shadow which, in dark mode (where --sacred-gold = #63d3b2),
+   * produced a strong teal-colored glow that bled into the card's art area
+   * making it look like a solid fill. We now use dedicated --surah-hover-shadow
+   * vars that are correctly tuned per theme with no color-mix() surprises.
+   *
+   * We also deliberately do NOT change the background on hover — only
+   * border, transform, and shadow — so card content always stays legible.
+   */
+  .glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border-mid);
+    border-radius: 24px;
+    box-shadow: var(--surah-base-shadow);
+    transition:
+      transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.22s ease;
+    animation: fadeInScale 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    will-change: transform, box-shadow;
+    overflow: hidden;
+  }
+
+  .glass-card:hover {
+    border-color: var(--card-border-hover);
+    transform: translateY(-5px) scale(1.012);
+    box-shadow: var(--surah-hover-shadow);
+  }
+
+  /* Active/press feedback */
+  .glass-card:active {
+    transform: translateY(-2px) scale(1.005);
+    transition-duration: 0.12s;
+  }
+
+  /* ─── Card art / decorative top section ───────────────────────────── */
+  /*
+   * If you have a decorative Arabic text banner area at the top of each card,
+   * apply .card-art-area to it. This keeps its background consistent and
+   * prevents the hover from making it look like a broken image.
+   */
+  .card-art-area {
+    background: var(--card-art-bg);
+    transition: background 0.32s ease;
+  }
+
+  .glass-card:hover .card-art-area {
+    background: var(--card-art-bg-hover);
+  }
+
+  /* ─── Glass button ─────────────────────────────────────────────────── */
+  .glass-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--glass-btn);
+    border: 1px solid var(--border-mid);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .glass-button:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-accent);
+    box-shadow: 0 0 0 3px var(--sacred-gold-dim);
+    transform: translateY(-1px);
+  }
+
+  .glass-button:active {
+    transform: translateY(0);
+    transition-duration: 0.08s;
+  }
+
+  /* ─── Gradient text ────────────────────────────────────────────────── */
+  .gradient-text {
+    background: var(--gradient-gold-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── Badges ───────────────────────────────────────────────────────── */
+  .badge-gold,
+  .badge-teal,
+  .teal-badge {
+    background: var(--sacred-gold-dim);
+    border: 1px solid var(--tone-gold-border);
+    color: var(--sacred-gold);
+    border-radius: 99px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  }
+
+  .badge-gold:hover,
+  .badge-teal:hover,
+  .teal-badge:hover {
+    background: color-mix(in srgb, var(--sacred-gold) 20%, transparent);
+    border-color: var(--sacred-gold);
+    transform: scale(1.04);
+  }
+
+  .badge-ruby,
+  .badge-amber,
+  .amber-badge {
+    background: var(--sacred-ruby-dim);
+    border: 1px solid var(--tone-ruby-border);
+    color: var(--sacred-ruby);
+    border-radius: 99px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  }
+
+  .badge-ruby:hover,
+  .badge-amber:hover,
+  .amber-badge:hover {
+    background: color-mix(in srgb, var(--sacred-ruby) 20%, transparent);
+    border-color: var(--sacred-ruby);
+    transform: scale(1.04);
+  }
+
+  .badge-green,
+  .badge-purple,
+  .purple-badge {
+    background: var(--sacred-green-dim);
+    border: 1px solid var(--tone-sage-border);
+    color: var(--sacred-green);
+    border-radius: 99px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  }
+
+  .badge-green:hover,
+  .badge-purple:hover,
+  .purple-badge:hover {
+    background: color-mix(in srgb, var(--sacred-green) 20%, transparent);
+    border-color: var(--sacred-green);
+    transform: scale(1.04);
+  }
+
+  /* ─── Arabic / translation text ────────────────────────────────────── */
+  .arabic-text {
+    direction: rtl;
+    unicode-bidi: plaintext;
+    text-align: right;
+    font-family: var(--arabic-font-family);
+    font-size: var(--arabic-font-size);
+    line-height: 2.2;
+    letter-spacing: 0.01em;
+    color: var(--text-primary);
+  }
+
+  .translation-text {
+    font-size: var(--translation-font-size);
+    color: var(--text-secondary);
+  }
+
+  .english-text {
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  /* ─── Search bar ───────────────────────────────────────────────────── */
+  .search-bar:focus-within {
+    border-color: var(--sacred-gold-light) !important;
+    box-shadow: 0 0 0 3px var(--sacred-gold-dim);
+  }
+
+  /* ─── Utility animations ────────────────────────────────────────────── */
+  .animate-fade-in {
+    animation: fadeInUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .animate-pulse-glass {
+    animation: pulseGlass 2s ease-in-out infinite;
+  }
+
+  /* Stagger helpers for grid reveals */
+  .stagger-1 { animation-delay: 0.04s; }
+  .stagger-2 { animation-delay: 0.08s; }
+  .stagger-3 { animation-delay: 0.12s; }
+  .stagger-4 { animation-delay: 0.16s; }
+  .stagger-5 { animation-delay: 0.20s; }
+  .stagger-6 { animation-delay: 0.24s; }
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseGlass {
+  0%, 100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Shimmer loading skeleton */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 25%,
+    var(--bg-card-hover) 50%,
+    var(--bg-card) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
+  border-radius: 8px;
+}

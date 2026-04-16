@@ -1,0 +1,5 @@
+/**
+ * Blocking inline script for `<script id="theme-init">`.
+ * Keep in sync with ThemeContext (`quran_theme`) and `lib/settings.ts` (`quran_settings`).
+ */
+export const PREHYDRATION_SCRIPT = `(()=>{try{var t=localStorage.getItem("quran_theme");var th=t==="dark"||t==="light"?t:"light";document.documentElement.setAttribute("data-theme",th);document.documentElement.style.colorScheme=th==="dark"?"dark":"light"}catch(e){}try{var raw=localStorage.getItem("quran_settings");if(!raw)return;var s=JSON.parse(raw);var m={"Scheherazade New":"'Scheherazade New', serif","Amiri":"'Amiri', serif","Noto Naskh Arabic":"'Noto Naskh Arabic', serif"};var af=s.arabicFont&&m[s.arabicFont]?s.arabicFont:"Scheherazade New";var ff=m[af];var afs=typeof s.arabicFontSize==="number"?Math.min(40,Math.max(16,s.arabicFontSize)):24;var tfs=typeof s.translationFontSize==="number"?Math.min(28,Math.max(12,s.translationFontSize)):16;var r=document.documentElement;r.style.setProperty("--arabic-font-family",ff);r.style.setProperty("--arabic-font-size",afs+"px");r.style.setProperty("--translation-font-size",tfs+"px")}catch(e){}})();`;
