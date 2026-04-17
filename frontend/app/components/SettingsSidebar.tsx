@@ -9,6 +9,20 @@ const fontOptions = [
   { label: "Uthmanic", value: "Noto Naskh Arabic" },
 ] as const;
 
+const pronunciationModes = [
+  { label: "Click", value: "click" },
+  { label: "Hover", value: "hover" },
+  { label: "Both", value: "click-and-hover" },
+] as const;
+
+const pronunciationSpeeds = [
+  { label: "0.5x", value: 0.5 },
+  { label: "0.7x", value: 0.7 },
+  { label: "0.8x", value: 0.8 },
+  { label: "1.0x", value: 1.0 },
+  { label: "1.2x", value: 1.2 },
+] as const;
+
 const SectionCard = ({ children }: { children: React.ReactNode }) => (
   <div
     style={{
@@ -278,6 +292,123 @@ const SettingsSidebar = () => {
             >
               In the name of Allah, the Most Gracious…
             </p>
+          </SectionCard>
+
+          {/* Pronunciation */}
+          <SectionCard>
+            <p
+              style={{
+                fontSize: "11px",
+                fontWeight: "700",
+                color: "var(--text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.10em",
+                margin: "0 0 12px",
+              }}
+            >
+              Pronunciation
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <p
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    color: "var(--text-secondary)",
+                    margin: "0 0 10px",
+                  }}
+                >
+                  Trigger mode
+                </p>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  {pronunciationModes.map((mode) => {
+                    const isActive = settings.pronunciationMode === mode.value;
+                    return (
+                      <button
+                        key={mode.value}
+                        type="button"
+                        onClick={() => updateSettings({ pronunciationMode: mode.value })}
+                        style={{
+                          minHeight: "38px",
+                          padding: "0 12px",
+                          borderRadius: "10px",
+                          border: `1px solid ${
+                            isActive ? "var(--tone-gold-border)" : "var(--border-subtle)"
+                          }`,
+                          background: isActive ? "var(--sacred-gold-dim)" : "var(--bg-card)",
+                          color: isActive ? "var(--sacred-gold)" : "var(--text-secondary)",
+                          cursor: "pointer",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          transition: "background 0.2s ease, border-color 0.2s ease",
+                        }}
+                      >
+                        {mode.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    fontSize: "13px",
+                    color: "var(--text-primary)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    checked={settings.arabicPronunciationEnabled}
+                    type="checkbox"
+                    onChange={(e) =>
+                      updateSettings({ arabicPronunciationEnabled: e.target.checked })
+                    }
+                  />
+                  Arabic word pronunciation
+                </label>
+              </div>
+
+              <div>
+                <p
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    color: "var(--text-secondary)",
+                    margin: "0 0 10px",
+                  }}
+                >
+                  Playback speed
+                </p>
+                <select
+                  aria-label="Pronunciation speed"
+                  value={settings.pronunciationSpeed}
+                  onChange={(e) =>
+                    updateSettings({ pronunciationSpeed: Number(e.target.value) })
+                  }
+                  style={{
+                    width: "100%",
+                    height: "40px",
+                    borderRadius: "10px",
+                    background: "var(--menu-bg)",
+                    color: "var(--text-primary)",
+                    border: "1px solid var(--border-subtle)",
+                    padding: "0 12px",
+                    cursor: "pointer",
+                  }}
+                >
+                  {pronunciationSpeeds.map((speed) => (
+                    <option key={speed.value} value={speed.value}>
+                      {speed.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </SectionCard>
 
           {/* Reset */}

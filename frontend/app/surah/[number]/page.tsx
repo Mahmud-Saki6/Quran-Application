@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import ScrollToTopButton from "@/app/components/ScrollToTopButton";
 import VerseItem from "@/app/components/VerseItem";
 import surahDetailsData from "@/lib/generated/surah-details.json";
 import type { SurahDetail } from "@/lib/types";
@@ -131,12 +130,11 @@ const SurahPage = async ({ params }: SurahPageProps) => {
           }}
         >
           <p
-            className="font-arabic text-3xl sm:text-4xl"
-            style={{ color: "var(--text-primary)" }}
+            className="bismillah-arabic"
           >
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
           </p>
-          <p className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
+          <p className="bismillah-translation">
             In the name of Allah, the Entirely Merciful, the Especially Merciful.
           </p>
         </section>
@@ -147,14 +145,13 @@ const SurahPage = async ({ params }: SurahPageProps) => {
           <VerseItem
             key={`${surah.number}-${verse.numberInSurah}`}
             index={index}
+            surahNumber={surah.number}
             surahEnglishName={surah.englishName}
             surahName={surah.name}
             verse={verse}
           />
         ))}
       </section>
-
-      <ScrollToTopButton />
     </div>
   );
 };

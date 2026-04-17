@@ -537,7 +537,7 @@ textarea::placeholder {
     text-align: right;
     font-family: var(--arabic-font-family);
     font-size: var(--arabic-font-size);
-    line-height: 2.2;
+    line-height: 2.05;
     letter-spacing: 0.01em;
     color: var(--text-primary);
   }
@@ -545,6 +545,161 @@ textarea::placeholder {
   .translation-text {
     font-size: var(--translation-font-size);
     color: var(--text-secondary);
+  }
+
+  /* Verse typography tuning (prevents “Arabic huge / English tiny” feeling). */
+  .verse-arabic {
+    direction: rtl;
+    unicode-bidi: plaintext;
+    text-align: right;
+    font-family: var(--arabic-font-family);
+    font-size: calc(var(--arabic-font-size) * 0.92);
+    line-height: 2.0;
+    letter-spacing: 0.01em;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .verse-translation {
+    color: var(--text-secondary);
+    font-size: calc(var(--translation-font-size) * 1.08);
+    line-height: 1.75;
+    margin: 18px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  /* Bismillah block: balanced, airy, never oversized. */
+  .bismillah-arabic {
+    direction: rtl;
+    unicode-bidi: plaintext;
+    text-align: center;
+    font-family: var(--arabic-font-family);
+    font-size: clamp(26px, 3.2vw, 40px);
+    line-height: 1.85;
+    margin: 0;
+    color: var(--text-primary);
+  }
+
+  .bismillah-translation {
+    font-size: clamp(13px, 1.2vw, 15px);
+    line-height: 1.6;
+    margin: 14px 0 0;
+    color: var(--text-muted);
+  }
+
+  .word-by-word-verse {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .word-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .word-row--arabic {
+    justify-content: flex-start;
+    direction: rtl;
+    text-align: right;
+  }
+
+  .word-token {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.18s ease;
+    padding: 4px 8px;
+    text-align: inherit;
+  }
+
+  .word-token:hover {
+    background: var(--sacred-gold-dim);
+    border-color: var(--border-subtle);
+  }
+
+  .word-token.is-active {
+    background: var(--sacred-gold-dim);
+    border-color: var(--tone-gold-border);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--sacred-gold) 14%, transparent);
+  }
+
+  .word-token--arabic {
+    direction: rtl;
+    unicode-bidi: plaintext;
+    font-family: var(--arabic-font-family);
+    font-size: calc(var(--arabic-font-size) * 0.92);
+    line-height: 1.95;
+    color: var(--text-primary);
+    text-align: right;
+  }
+
+  .word-token__text {
+    position: relative;
+    z-index: 1;
+  }
+
+  .word-token__icon {
+    position: absolute;
+    top: -18px;
+    inset-inline-end: 0;
+    opacity: 0;
+    pointer-events: none;
+    font-size: 10px;
+    line-height: 1;
+    color: var(--sacred-gold);
+    transition: opacity 0.18s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .word-token:hover .word-token__icon,
+  .word-token.is-active .word-token__icon {
+    opacity: 0.9;
+  }
+
+  /* ─── Verse-level audio buttons ─────────────────────────────────────── */
+  .verse-audio-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition:
+      transform 0.16s ease,
+      color 0.18s ease,
+      opacity 0.18s ease;
+    flex-shrink: 0;
+    opacity: 0.45;
+  }
+
+  .verse-audio-btn:hover {
+    transform: scale(1.06);
+    opacity: 1;
+    color: var(--sacred-gold);
+  }
+
+  .verse-audio-btn.is-playing {
+    opacity: 1;
+    color: var(--sacred-gold);
   }
 
   .english-text {
@@ -557,6 +712,12 @@ textarea::placeholder {
   .search-bar:focus-within {
     border-color: var(--sacred-gold-light) !important;
     box-shadow: 0 0 0 3px var(--sacred-gold-dim);
+  }
+
+  /* Prevent “double border” (input focus ring + wrapper ring). */
+  .search-bar input:focus-visible,
+  .search-bar textarea:focus-visible {
+    box-shadow: none !important;
   }
 
   /* ─── Utility animations ────────────────────────────────────────────── */

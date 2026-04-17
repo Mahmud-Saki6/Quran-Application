@@ -2,10 +2,13 @@
 
 import { memo, useState } from "react";
 
+import VerseAudio from "@/app/components/VerseAudio";
+import WordByWordVerse from "@/app/components/WordByWordVerse";
 import type { Verse } from "@/lib/types";
 
 interface VerseItemProps {
   index: number;
+  surahNumber: number;
   surahEnglishName: string;
   surahName: string;
   verse: Verse;
@@ -13,6 +16,7 @@ interface VerseItemProps {
 
 const VerseItemComponent = ({
   index,
+  surahNumber,
   surahEnglishName,
   surahName,
   verse,
@@ -82,22 +86,58 @@ const VerseItemComponent = ({
           </button>
         </div>
 
-        {/* Arabic text */}
-        <p className="arabic-text">{verse.arabicText}</p>
-
-        {/* English translation — sizes from CSS vars (pre-hydration + Settings) */}
-        <p
-          className="translation-text"
+        {/* Arabic: speaker EXTREME LEFT + Arabic content on the right */}
+        <div
           style={{
-            marginTop: "14px",
-            paddingTop: "14px",
-            borderTop: "1px solid var(--border-subtle)",
-            lineHeight: 1.75,
-            textAlign: "left",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px",
           }}
         >
-          {verse.translation}
-        </p>
+          <div style={{ flex: "0 0 auto" }}>
+            <VerseAudio
+              kind="arabic"
+              arabicText={verse.arabicText}
+              englishTranslation={verse.translation}
+              surahNumber={surahNumber}
+              verseNumber={verse.numberInSurah}
+            />
+          </div>
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <WordByWordVerse
+              arabicText={verse.arabicText}
+              surahNumber={surahNumber}
+              verseNumber={verse.numberInSurah}
+            />
+          </div>
+        </div>
+
+        {/* English: text LEFT, speaker EXTREME RIGHT */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px",
+            marginTop: "18px",
+            paddingTop: "16px",
+            borderTop: "1px solid var(--border-subtle)",
+          }}
+        >
+          <p className="translation-text" style={{ flex: 1, margin: 0, textAlign: "left" }}>
+            {verse.translation}
+          </p>
+
+          <div style={{ flex: "0 0 auto" }}>
+            <VerseAudio
+              kind="english"
+              arabicText={verse.arabicText}
+              englishTranslation={verse.translation}
+              surahNumber={surahNumber}
+              verseNumber={verse.numberInSurah}
+            />
+          </div>
+        </div>
       </div>
     </article>
   );

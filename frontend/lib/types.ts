@@ -3,6 +3,8 @@ export type ArabicFontFamily =
   | "Amiri"
   | "Noto Naskh Arabic";
 
+export type PronunciationMode = "click" | "hover" | "click-and-hover";
+
 export interface SurahSummary {
   number: number;
   name: string;
@@ -40,6 +42,9 @@ export interface Settings {
   arabicFont: ArabicFontFamily;
   arabicFontSize: number;
   translationFontSize: number;
+  pronunciationMode: PronunciationMode;
+  arabicPronunciationEnabled: boolean;
+  pronunciationSpeed: number;
 }
 
 export interface QuranListApiResponse {

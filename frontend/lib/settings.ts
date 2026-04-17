@@ -1,13 +1,20 @@
-import type { ArabicFontFamily, Settings } from "@/lib/types";
+import type {
+  ArabicFontFamily,
+  PronunciationMode,
+  Settings,
+} from "@/lib/types";
 
 export const SETTINGS_STORAGE_KEY = "quran_settings";
-export const SETTINGS_VERSION = 1;
+export const SETTINGS_VERSION = 2;
 
 export const DEFAULT_SETTINGS: Settings = {
   version: SETTINGS_VERSION,
   arabicFont: "Scheherazade New",
   arabicFontSize: 24,
   translationFontSize: 16,
+  pronunciationMode: "click",
+  arabicPronunciationEnabled: true,
+  pronunciationSpeed: 0.8,
 };
 
 const FONT_FAMILY_MAP: Record<ArabicFontFamily, string> = {
@@ -20,6 +27,11 @@ const isFontFamily = (value: unknown): value is ArabicFontFamily =>
   value === "Scheherazade New" ||
   value === "Amiri" ||
   value === "Noto Naskh Arabic";
+
+const isPronunciationMode = (value: unknown): value is PronunciationMode =>
+  value === "click" ||
+  value === "hover" ||
+  value === "click-and-hover";
 
 export const normalizeSettings = (value: unknown): Settings => {
   if (!value || typeof value !== "object") {
@@ -41,6 +53,17 @@ export const normalizeSettings = (value: unknown): Settings => {
       typeof incoming.translationFontSize === "number"
         ? Math.min(28, Math.max(12, incoming.translationFontSize))
         : DEFAULT_SETTINGS.translationFontSize,
+    pronunciationMode: isPronunciationMode(incoming.pronunciationMode)
+      ? incoming.pronunciationMode
+      : DEFAULT_SETTINGS.pronunciationMode,
+    arabicPronunciationEnabled:
+      typeof incoming.arabicPronunciationEnabled === "boolean"
+        ? incoming.arabicPronunciationEnabled
+        : DEFAULT_SETTINGS.arabicPronunciationEnabled,
+    pronunciationSpeed:
+      typeof incoming.pronunciationSpeed === "number"
+        ? Math.min(1.2, Math.max(0.5, incoming.pronunciationSpeed))
+        : DEFAULT_SETTINGS.pronunciationSpeed,
   };
 };
 

@@ -5,7 +5,7 @@
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-38B2AC?logo=tailwind-css)
-![Static Export](https://img.shields.io/badge/Static-Export-success)
+![SSG](https://img.shields.io/badge/SSG-success)
 
 **A production-ready Quran web application with static generation, full-text search, and persistent reader settings.**
 
@@ -30,7 +30,7 @@
 
 ## 📖 Overview
 
-**SurahFlow** is a modern Quran reading application built with Next.js 16's App Router and Static Site Generation (SSG). All 114 surahs are pre-rendered at build time, delivering instant page loads with zero server dependencies at runtime.
+**SurahFlow** is a modern Quran reading application built with Next.js 16's App Router and Static Site Generation (SSG), plus a lightweight Node.js backend implemented with Next.js API Routes. All 114 surahs are pre-rendered at build time for fast page loads, while the backend exposes Quran data through `/api/*` endpoints in the same deployment.
 
 The application features a glassmorphism UI, responsive design across all devices, and full-text search across English translations. Reader preferences are persisted locally using `localStorage`.
 
@@ -61,13 +61,12 @@ The application features a glassmorphism UI, responsive design across all device
 - Responsive grid layout (1–4 columns based on screen size)
 - Smooth hover animations and transitions
 - Loading skeletons for async operations
-- Scroll-to-top button for long surahs
 
 ### Performance
-- 100% static export (`output: 'export'`)
-- 118 pre-rendered pages (114 surahs + 4 supporting pages)
+- SSG pages generated at build time
+- 118 pre-rendered pages (114 surahs + supporting pages)
 - Build-time data fetching from Quran API
-- No runtime API calls for surah lists
+- Backend API routes available at runtime for integration/demo requirements
 
 ---
 
@@ -75,7 +74,8 @@ The application features a glassmorphism UI, responsive design across all device
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| **Framework** | Next.js 16 (App Router) | SSG, routing, build system |
+| **Frontend** | Next.js 16 (App Router) | SSG, routing, build system |
+| **Backend** | Node.js (Next.js API Routes) | API endpoints for surahs, ayahs, and search |
 | **Language** | TypeScript 5.0 | Type safety, better DX |
 | **Styling** | Tailwind CSS 3 | Utility-first styling |
 | **Fonts** | Google Fonts / @fontsource | Scheherazade New, Amiri, Inter |
@@ -89,6 +89,7 @@ The application features a glassmorphism UI, responsive design across all device
 frontend/
 ├── app/
 │ ├── layout.tsx # Root layout with providers
+│ ├── api/ # Node.js backend via Next.js Route Handlers
 │ ├── page.tsx # Surah list page (SSG)
 │ ├── surah/[number]/ # Individual surah pages (SSG)
 │ │ ├── page.tsx
@@ -111,7 +112,7 @@ frontend/
 ├── public/ # Static assets
 ├── scripts/
 │ └── generate-static-data.mjs # Build-time data generator
-├── next.config.js # Next.js config (output: 'export')
+├── next.config.js # Next.js config
 ├── tailwind.config.js # Tailwind configuration
 ├── package.json
 └── tsconfig.json
@@ -132,21 +133,20 @@ text
 ```bash
 # Clone the repository
 git clone https://github.com/YOUR_USERNAME/surahflow.git
-cd surahflow/frontend
+cd surahflow
 
 # Install dependencies
-npm install
+npm run install:all
 
-# Run development server
+# Run the app (frontend + API routes)
 npm run dev
 
 # Build for production
 npm run build
 
-# Preview production build
+# Start production server
 npm run start
-Open http://localhost:3000 to view the application.
+```
 
-Build Output
-bash
-npm run build
+App: `http://localhost:3000`  
+API example: `http://localhost:3000/api/surahs`
