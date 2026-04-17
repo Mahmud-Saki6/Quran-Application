@@ -1,18 +1,18 @@
 const QURAN_WORDS_API_BASE = "https://api.quran.com/api/v4/verses/by_key";
 const QURAN_AUDIO_CDN_BASE = "https://audio.qurancdn.com";
 
-export interface ArabicWordAudioToken {
+export interface VerseToken {
   id: number;
-  position: number;
   text: string;
   audioUrl: string | null;
+  isWord: boolean;
+  position: number | null;
 }
 
 interface QuranWordApiResponse {
   verse?: {
     words?: Array<{
       id?: number;
-      position?: number;
       audio_url?: string | null;
       char_type_name?: string;
       text_uthmani?: string;
@@ -21,54 +21,77 @@ interface QuranWordApiResponse {
   };
 }
 
-const verseWordCache = new Map<string, Promise<ArabicWordAudioToken[]>>();
-
-const buildAudioUrl = (audioPath?: string | null) => {
+const buildAudioUrl = (audioPath?: string | null): string | null => {
   if (!audioPath) return null;
   if (/^https?:\/\//i.test(audioPath)) return audioPath;
   return `${QURAN_AUDIO_CDN_BASE}/${audioPath.replace(/^\/+/, "")}`;
 };
 
+/** True only if text contains actual Arabic letter codepoints — not just marks/symbols */
+const hasArabicLetters = (text: string): boolean =>
+  /[\u0600-\u063F\u0641-\u064A\u066E\u066F\u0671-\u06D3\u06D5]/.test(text);
+
+const verseCache = new Map<string, Promise<VerseToken[]>>();
+
 export const fetchVerseWords = async (
   surahNumber: number,
   verseNumber: number,
-): Promise<ArabicWordAudioToken[]> => {
-  const verseKey = `${surahNumber}:${verseNumber}`;
+): Promise<VerseToken[]> => {
+  const key = `${surahNumber}:${verseNumber}`;
 
-  if (verseWordCache.has(verseKey)) {
-    return verseWordCache.get(verseKey)!;
+  const existing = verseCache.get(key);
+  if (existing) {
+    const resolved = await existing;
+    if (resolved.length > 0) return resolved;
+    verseCache.delete(key);
   }
 
-  const request = fetch(
-    `${QURAN_WORDS_API_BASE}/${verseKey}?words=true&word_fields=audio_url,text_uthmani`,
-  )
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to fetch word audio for ${verseKey}`);
-      }
+  const promise = (async (): Promise<VerseToken[]> => {
+    const res = await fetch(
+      `${QURAN_WORDS_API_BASE}/${key}?words=true&word_fields=audio_url,text_uthmani`,
+      { headers: { Accept: "application/json" } },
+    );
+    if (!res.ok) throw new Error(`Quran.com words API ${res.status}`);
 
-      const data = (await response.json()) as QuranWordApiResponse;
-      const words = data.verse?.words ?? [];
+    const data = (await res.json()) as QuranWordApiResponse;
+    const raw = data.verse?.words ?? [];
 
-      return words
-        // Only keep real word tokens; Quran.com can include pauses/end markers
-        // which would shift indices and misalign audio playback.
-        .filter((word) => word.char_type_name === "word")
-        .map((word, index) => ({
-          id: word.id ?? index + 1,
-          position: word.position ?? index + 1,
-          text: word.text_uthmani ?? word.text ?? "",
-          audioUrl: buildAudioUrl(word.audio_url),
-        }))
-        .filter((word) => word.text.length > 0);
+    let wordCount = 0;
+    const out: VerseToken[] = [];
+
+    for (let i = 0; i < raw.length; i++) {
+      const w = raw[i]!;
+      const text = w.text_uthmani ?? w.text ?? "";
+      if (text.length === 0) continue;
+
+      // A token is a real word only if the API says so AND it has actual Arabic letters.
+      // Pause marks (ۚ ۗ ۖ ۛ) can arrive with char_type_name="word" but no letters.
+      const isWord = w.char_type_name === "word" && hasArabicLetters(text);
+      if (isWord) wordCount++;
+
+      out.push({
+        id: w.id ?? i + 1,
+        text,
+        audioUrl: isWord ? buildAudioUrl(w.audio_url) : null,
+        isWord,
+        position: isWord ? wordCount : null,
+      });
+    }
+
+    return out;
+  })()
+    .then((tokens) => {
+      if (tokens.length > 0) verseCache.set(key, Promise.resolve(tokens));
+      return tokens;
     })
-    .catch(() => [])
-    .then((words) => {
-      verseWordCache.set(verseKey, Promise.resolve(words));
-      return words;
+    .catch((err) => {
+      console.warn(`[wordAudio] ${key}:`, err);
+      verseCache.delete(key);
+      return [] as VerseToken[];
     });
 
-  verseWordCache.set(verseKey, request);
-  return request;
+  verseCache.set(key, promise);
+  const result = await promise;
+  if (result.length === 0) verseCache.delete(key);
+  return result;
 };
-

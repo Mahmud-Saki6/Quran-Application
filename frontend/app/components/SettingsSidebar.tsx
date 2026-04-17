@@ -67,22 +67,20 @@ const SettingsSidebar = () => {
       <aside
         aria-hidden={!isSidebarOpen}
         aria-label="Reader settings"
-        className="fixed right-0 top-0 z-50 h-full w-full sm:w-80 lg:w-96"
+        className="fixed right-0 top-0 z-50 h-full w-full sm:w-80 md:w-96"
         style={{
           background: "var(--sidebar-bg)",
           borderLeft: "1px solid var(--border-subtle)",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
           boxShadow: "var(--sidebar-shadow)",
-          padding: "20px",
+          padding: "0px",
           overflowY: "auto",
           transition: "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)",
           transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)",
         }}
       >
-        <div
-          style={{ display: "flex", flexDirection: "column", gap: "20px", minHeight: "100%" }}
-        >
+        <div className="flex min-h-full flex-col gap-5 p-4 sm:p-5 md:p-6">
           {/* Header */}
           <div
             style={{

@@ -1,49 +1,76 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import SearchBar from "@/app/components/SearchBar";
 import { useSettings } from "@/context/SettingsContext";
 
 const Header = () => {
   const { openSidebar } = useSettings();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (!isSearchOpen) return;
+    const q = (searchParams.get("q") ?? "").trim();
+    if (pathname === "/search" && q.length > 0) {
+      setIsSearchOpen(false);
+    }
+  }, [isSearchOpen, pathname, searchParams]);
 
   return (
-    <header className="app-header relative z-[50]">
-      <div
-        style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          padding: "12px 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "20px",
-        }}
-      >
+    <header className="app-header sticky top-0 z-[50] border-b border-[var(--border-subtle)] bg-[var(--header-bg)] backdrop-blur-lg">
+      <div className="mx-auto flex h-14 max-w-[1400px] min-w-0 items-center justify-between gap-2 px-3 sm:h-16 sm:gap-4 sm:px-4 md:px-6 lg:px-8">
         <Link
           href="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            textDecoration: "none",
-            color: "var(--text-primary)",
-          }}
+          className="flex flex-none items-center gap-2 text-[var(--text-primary)] no-underline"
         >
-          <div className="app-header-logo-icon" style={{ width: "40px", height: "40px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold" }}>
+          <div className="app-header-logo-icon flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold sm:h-9 sm:w-9">
             ﷽
           </div>
-          <span className="gradient-text" style={{ fontSize: "18px", fontWeight: "600" }}>
+          <span className="gradient-text hidden text-base font-semibold xs:inline sm:text-lg">
             SurahFlow
           </span>
         </Link>
 
-        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          <SearchBar />
-        </div>
+        <div className="flex flex-1 items-center justify-end gap-2 min-w-0">
+          <div
+            className={`min-w-0 ${
+              isSearchOpen
+                ? "w-[190px] xs:w-[210px] sm:w-[260px] md:w-[320px]"
+                : "w-0 overflow-hidden"
+            }`}
+          >
+            {isSearchOpen ? (
+              <SearchBar
+                autoFocus
+                variant="header"
+                onRequestClose={() => setIsSearchOpen(false)}
+              />
+            ) : null}
+          </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+          {!isSearchOpen ? (
+            <button
+              aria-label="Open verse search"
+              className="settings-tool-btn"
+              type="button"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              <svg fill="none" height="20" viewBox="0 0 24 24" width="20">
+                <path
+                  d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="1.5"
+                />
+              </svg>
+            </button>
+          ) : null}
+
           <button
             aria-label="Open reader settings"
             className="settings-tool-btn"

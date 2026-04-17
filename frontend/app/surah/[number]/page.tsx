@@ -52,7 +52,7 @@ const SurahPage = async ({ params }: SurahPageProps) => {
   const nextSurah = surahDetails.find((item) => item.number === surahNumber + 1) ?? null;
 
   return (
-    <div className="animate-fade-in space-y-6">
+    <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-4 md:px-6 lg:px-8 animate-fade-in space-y-6">
       <section className="glass-card overflow-hidden p-6 sm:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -122,7 +122,7 @@ const SurahPage = async ({ params }: SurahPageProps) => {
         </div>
       </section>
 
-      {surah.number !== 9 ? (
+      {surah.number !== 9 && surah.number !== 1 ? (
         <section
           className="glass-card p-6 text-center"
           style={{
@@ -140,7 +140,7 @@ const SurahPage = async ({ params }: SurahPageProps) => {
         </section>
       ) : null}
 
-      <section className="space-y-4">
+      <section className="space-y-3 sm:space-y-4">
         {surah.ayahs.map((verse, index) => (
           <VerseItem
             key={`${surah.number}-${verse.numberInSurah}`}

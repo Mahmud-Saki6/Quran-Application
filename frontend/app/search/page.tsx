@@ -200,7 +200,7 @@ const SearchPageInner = () => {
             Searching for:{" "}
             {keywords.map((kw, i) => (
               <span
-                key={kw}
+                key={`${kw}-${i}`}
                 style={{
                   background: "var(--sacred-gold-dim)",
                   border: "1px solid rgba(184, 134, 11, 0.35)",
@@ -524,7 +524,7 @@ const SearchPageInner = () => {
 
             return (
               <Link
-                key={entry.id}
+                key={`${entry.surahNumber}:${entry.verseNumber}`}
                 href={`/surah/${entry.surahNumber}#verse-${entry.verseNumber}`}
                 style={{ textDecoration: "none" }}
               >

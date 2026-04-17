@@ -4,6 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useSettings } from "@/context/SettingsContext";
 import { getGlobalAyahNumber } from "@/lib/ayah";
+import {
+  VERSE_ARABIC_RECITATION_END,
+  VERSE_ARABIC_RECITATION_WORD,
+  getVerseArabicWordCount,
+} from "@/lib/verseRecitationBridge";
 
 interface VerseAudioProps {
   kind: "arabic" | "english";
@@ -28,17 +33,60 @@ const VerseAudio = ({
   const [playing, setPlaying] = useState<Playing>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const playingRef = useRef<Playing>(null);
+  const lastRecitationWordRef = useRef(0);
+  const timeUpdateHandlerRef = useRef<(() => void) | null>(null);
 
   const arabicAudioUrl = useMemo(() => {
     const globalAyah = getGlobalAyahNumber(surahNumber, verseNumber);
     return `${ARABIC_AUDIO_BASE}/${globalAyah}.mp3`;
   }, [surahNumber, verseNumber]);
 
+  const dispatchRecitationEnd = () => {
+    window.dispatchEvent(
+      new CustomEvent(VERSE_ARABIC_RECITATION_END, {
+        detail: { surahNumber, verseNumber },
+      }),
+    );
+  };
+
+  const tickArabicRecitation = () => {
+    const audio = audioRef.current;
+    if (!audio || playingRef.current !== "arabic") return;
+    const d = audio.duration;
+    const t = audio.currentTime;
+    if (!Number.isFinite(d) || d <= 0) return;
+
+    const wc =
+      getVerseArabicWordCount(surahNumber, verseNumber) ??
+      Math.max(1, arabicText.split(/\s+/).filter(Boolean).length);
+
+    const wordPosition = Math.min(wc, Math.max(1, 1 + Math.floor((t / d) * wc)));
+
+    if (wordPosition !== lastRecitationWordRef.current) {
+      lastRecitationWordRef.current = wordPosition;
+      window.dispatchEvent(
+        new CustomEvent(VERSE_ARABIC_RECITATION_WORD, {
+          detail: { surahNumber, verseNumber, wordPosition },
+        }),
+      );
+    }
+  };
+
+  const detachArabicRecitationListeners = (audio: HTMLAudioElement) => {
+    const fn = timeUpdateHandlerRef.current;
+    if (fn) {
+      audio.removeEventListener("timeupdate", fn);
+      audio.removeEventListener("playing", fn);
+      timeUpdateHandlerRef.current = null;
+    }
+  };
+
   const stopAll = () => {
-    // Stop any other verse/word audio in the app.
     window.dispatchEvent(new Event("surahflow:stop-audio"));
 
     if (audioRef.current) {
+      detachArabicRecitationListeners(audioRef.current);
       audioRef.current.pause();
       audioRef.current = null;
     }
@@ -46,6 +94,7 @@ const VerseAudio = ({
       window.speechSynthesis.cancel();
     }
     speechRef.current = null;
+    playingRef.current = null;
     setPlaying(null);
   };
 
@@ -56,24 +105,48 @@ const VerseAudio = ({
     }
 
     stopAll();
+    playingRef.current = "arabic";
     setPlaying("arabic");
 
     const audio = new Audio(arabicAudioUrl);
     audioRef.current = audio;
+    lastRecitationWordRef.current = 0;
+
+    const onTick = () => {
+      tickArabicRecitation();
+    };
+    timeUpdateHandlerRef.current = onTick;
+    audio.addEventListener("timeupdate", onTick);
+    audio.addEventListener("playing", onTick);
+
     audio.onended = () => {
+      detachArabicRecitationListeners(audio);
       audioRef.current = null;
+      playingRef.current = null;
       setPlaying(null);
+      dispatchRecitationEnd();
     };
     audio.onerror = () => {
+      detachArabicRecitationListeners(audio);
       audioRef.current = null;
-      // Fallback: speech synthesis if CDN fails.
+      lastRecitationWordRef.current = 0;
+      dispatchRecitationEnd();
+
       const u = new SpeechSynthesisUtterance(arabicText);
       u.lang = "ar-SA";
       u.rate = settings.pronunciationSpeed;
       u.pitch = 1;
-      u.onend = () => setPlaying(null);
-      u.onerror = () => setPlaying(null);
+      u.onend = () => {
+        playingRef.current = null;
+        setPlaying(null);
+      };
+      u.onerror = () => {
+        playingRef.current = null;
+        setPlaying(null);
+      };
       speechRef.current = u;
+      playingRef.current = "arabic";
+      setPlaying("arabic");
       window.speechSynthesis.speak(u);
     };
     audio.play().catch(() => {
@@ -88,31 +161,47 @@ const VerseAudio = ({
     }
 
     stopAll();
+    playingRef.current = "english";
     setPlaying("english");
 
     const u = new SpeechSynthesisUtterance(englishTranslation);
     u.lang = "en-US";
     u.rate = settings.pronunciationSpeed;
     u.pitch = 1;
-    u.onend = () => setPlaying(null);
-    u.onerror = () => setPlaying(null);
+    u.onend = () => {
+      playingRef.current = null;
+      setPlaying(null);
+    };
+    u.onerror = () => {
+      playingRef.current = null;
+      setPlaying(null);
+    };
     speechRef.current = u;
     window.speechSynthesis.speak(u);
   };
 
   useEffect(() => {
     const onStop = () => {
+      const wasArabic = playingRef.current === "arabic";
+
       if (audioRef.current) {
+        detachArabicRecitationListeners(audioRef.current);
         audioRef.current.pause();
         audioRef.current = null;
       }
       if ("speechSynthesis" in window) window.speechSynthesis.cancel();
       speechRef.current = null;
+      playingRef.current = null;
       setPlaying(null);
+
+      if (wasArabic) {
+        lastRecitationWordRef.current = 0;
+        dispatchRecitationEnd();
+      }
     };
     window.addEventListener("surahflow:stop-audio", onStop);
     return () => window.removeEventListener("surahflow:stop-audio", onStop);
-  }, []);
+  }, [surahNumber, verseNumber]);
 
   const isThisPlaying = playing === kind;
   const onClick = kind === "arabic" ? playArabic : playEnglish;
@@ -165,4 +254,3 @@ const VerseAudio = ({
 };
 
 export default VerseAudio;
-

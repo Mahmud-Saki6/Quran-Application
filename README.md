@@ -30,7 +30,7 @@
 
 ## 📖 Overview
 
-**SurahFlow** is a modern Quran reading application built with Next.js 16's App Router and Static Site Generation (SSG), plus a lightweight Node.js backend implemented with Next.js API Routes. All 114 surahs are pre-rendered at build time for fast page loads, while the backend exposes Quran data through `/api/*` endpoints in the same deployment.
+**SurahFlow** is a modern Quran reading application built with Next.js 16's App Router and Static Site Generation (SSG). Surah pages are pre-rendered at build time from generated JSON. A separate **Node.js backend** (Hono + **SQLite**) serves `/api/*` routes: the Next.js dev server **rewrites** browser requests from `http://localhost:3000/api/...` to the backend (default `http://127.0.0.1:3001`). The database is **seeded** from the same JSON files the build uses (`frontend/lib/generated`).
 
 The application features a glassmorphism UI, responsive design across all devices, and full-text search across English translations. Reader preferences are persisted locally using `localStorage`.
 
@@ -65,8 +65,28 @@ The application features a glassmorphism UI, responsive design across all device
 ### Performance
 - SSG pages generated at build time
 - 118 pre-rendered pages (114 surahs + supporting pages)
-- Build-time data fetching from Quran API
-- Backend API routes available at runtime for integration/demo requirements
+- Build-time data via `generate-static-data.mjs` (online open Quran API)
+- Optional SQLite-backed API in `/backend` (surahs/search seed); word-by-word audio uses Quran.com from the browser (`frontend/lib/wordAudio.ts`)
+
+---
+
+## ✅ Assignment / submission checklist
+
+Use this to verify the brief before you submit (public GitHub repo, live demo, **≤5 min screen recording** — you must provide those three yourself).
+
+| Requirement | Where it is implemented |
+|-------------|---------------------------|
+| **Database** (online / e.g. GitHub-style open data) | **SQLite** `backend/data/quran.sqlite`, **seeded** from JSON under `frontend/lib/generated/` produced at build time. Data is collected from the **public AlQuran Cloud API** in `frontend/scripts/generate-static-data.mjs` (same kind of open corpus many [GitHub Quran JSON](https://github.com/semarketir/quranjson) projects mirror). |
+| **Backend** Node.js (Hono optional) | `backend/` — **Hono** + **Node** + **`node:sqlite`**, REST routes `/api/surahs`, `/api/surah/:n`, `/api/search`, optional `/api/verse/.../words`. |
+| **Frontend** Next.js **SSG** | `app/surah/[number]/page.tsx` — `generateStaticParams` for all **114** surahs; home and search are static/client as built. |
+| **Tailwind CSS** | `tailwind.config.js`, utility classes across `app/` and `components/`. |
+| **Responsive UI** | Layout breakpoints (`sm:`, `md:`, `lg:`, etc.) on home grid, surah page, header, settings drawer (`SettingsSidebar`: full width on small screens). |
+| **Surah list — 114 surahs, Arabic + English** | `app/page.tsx` + `SurahCard.tsx` — `surah.name` (Arabic), `surah.englishName`, `englishNameTranslation`. |
+| **Ayah page — Arabic + translation** | `app/surah/[number]/page.tsx` + `VerseItem.tsx` — `arabicText` + `translation` per verse. |
+| **Search** (by translation text) | `app/search/page.tsx` — searches English translation text; optional surah filter. |
+| **Settings sidebar** | `SettingsSidebar.tsx` + `SettingsContext.tsx` — **≥2 Arabic fonts** (three options), **Arabic font size**, **translation font size**, pronunciation options; **`localStorage`** via `lib/settings.ts` (`SETTINGS_STORAGE_KEY`). |
+
+**You still need to submit:** (1) **public** GitHub repository URL, (2) **Vercel or Netlify** live URL (test in **incognito**), (3) **screen recording** (max 5 minutes) showing list → surah → search → settings persistence.
 
 ---
 
@@ -75,21 +95,28 @@ The application features a glassmorphism UI, responsive design across all device
 | Layer | Technology | Purpose |
 |-------|------------|---------|
 | **Frontend** | Next.js 16 (App Router) | SSG, routing, build system |
-| **Backend** | Node.js (Next.js API Routes) | API endpoints for surahs, ayahs, and search |
+| **Backend** | Node.js + Hono + SQLite (`/backend`) | Optional REST API; seed from generated JSON |
 | **Language** | TypeScript 5.0 | Type safety, better DX |
 | **Styling** | Tailwind CSS 3 | Utility-first styling |
 | **Fonts** | Google Fonts / @fontsource | Scheherazade New, Amiri, Inter |
-| **Data Source** | AlQuran Cloud API | Quran text and translations |
+| **Data Source** | Build-time JSON (`generate-static-data.mjs`) + optional SQLite API | Quran text and translations |
+| **Word audio** | Quran.com API (client, `wordAudio.ts`) | Per-word clips when pronunciation is enabled |
 | **Persistence** | localStorage | User settings storage |
-| **Deployment** | Vercel | Static hosting, CDN |
+| **Deployment** | Vercel (frontend) + optional backend host | Set `BACKEND_URL` / `NEXT_PUBLIC_API_URL` if API is remote |
 
 ---
 
 ## 📁 Project Structure
+backend/
+├── src/index.ts # Hono app + `@hono/node-server`
+├── src/db.ts # SQLite access + word cache
+├── scripts/seed.ts # Import `frontend/lib/generated` into SQLite
+├── data/quran.sqlite # Created by `npm run seed` (gitignored)
+└── package.json
+
 frontend/
 ├── app/
 │ ├── layout.tsx # Root layout with providers
-│ ├── api/ # Node.js backend via Next.js Route Handlers
 │ ├── page.tsx # Surah list page (SSG)
 │ ├── surah/[number]/ # Individual surah pages (SSG)
 │ │ ├── page.tsx
@@ -117,15 +144,13 @@ frontend/
 ├── package.json
 └── tsconfig.json
 
-text
-
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ or Bun 1.0+
+- Node.js **22.5+** recommended (backend uses `node:sqlite`; frontend runs on Node 18+)
 - npm / yarn / pnpm
 
 ### Installation
@@ -135,18 +160,24 @@ text
 git clone https://github.com/YOUR_USERNAME/surahflow.git
 cd surahflow
 
-# Install dependencies
+# Install dependencies (frontend + backend)
 npm run install:all
 
-# Run the app (frontend + API routes)
+# Generate JSON and seed the database (first time / after clone)
+cd frontend && node ./scripts/generate-static-data.mjs && cd ..
+npm run seed:db
+
+# Run Next.js + backend together (backend must be on :3001 for rewrites)
 npm run dev
 
 # Build for production
 npm run build
 
-# Start production server
+# Start production Next server (point BACKEND_URL at your deployed API if needed)
 npm run start
 ```
 
 App: `http://localhost:3000`  
-API example: `http://localhost:3000/api/surahs`
+API (proxied): `http://localhost:3000/api/surahs` → backend `http://127.0.0.1:3001/api/surahs`
+
+Set `BACKEND_URL` in the environment when the API runs on a different host (see `frontend/next.config.js`).

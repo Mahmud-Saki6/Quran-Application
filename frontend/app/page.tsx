@@ -267,48 +267,11 @@ const HomePage = () => {
         </div>
       ) : (
         <>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              gap: "24px",
-              marginTop: "40px",
-              position: "relative",
-              isolation: "isolate",
-              alignItems: "start",
-            }}
-          >
-          {filteredSurahs.map((surah, i) => (
-            <SurahCard key={surah.number} index={i} surah={surah} />
-          ))}
+          <div className="isolate mt-10 grid w-full auto-rows-fr justify-items-stretch grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredSurahs.map((surah, i) => (
+              <SurahCard key={surah.number} index={i} surah={surah} />
+            ))}
           </div>
-
-          <style jsx>{`
-            @media (max-width: 768px) {
-              div[style*="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))"] {
-                grid-template-columns: 1fr !important;
-                gap: 16px !important;
-              }
-            }
-
-            @media (min-width: 769px) and (max-width: 1024px) {
-              div[style*="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))"] {
-                grid-template-columns: repeat(2, 1fr) !important;
-              }
-            }
-
-            @media (min-width: 1025px) and (max-width: 1280px) {
-              div[style*="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))"] {
-                grid-template-columns: repeat(3, 1fr) !important;
-              }
-            }
-
-            @media (min-width: 1281px) {
-              div[style*="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))"] {
-                grid-template-columns: repeat(4, 1fr) !important;
-              }
-            }
-          `}</style>
         </>
       )}
     </div>

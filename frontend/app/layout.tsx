@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 
 import Header from "@/app/components/Header";
@@ -14,6 +14,13 @@ export const metadata: Metadata = {
     template: "%s | SurahFlow",
   },
   description: "Read, reflect, and search across the Holy Quran",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: true,
 };
 
 const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
@@ -33,14 +40,7 @@ const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
               <Header />
             </Suspense>
             <SettingsSidebar />
-            <main
-              className="relative z-[1]"
-              style={{
-                maxWidth: "1400px",
-                margin: "0 auto",
-                padding: "80px 24px 40px",
-              }}
-            >
+            <main className="relative z-[1] mx-auto max-w-[1400px] px-3 pb-10 pt-20 sm:px-4 md:px-6 lg:px-8">
               {children}
             </main>
           </SettingsProvider>

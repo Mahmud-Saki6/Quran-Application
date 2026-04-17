@@ -17,7 +17,7 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
   return (
     <Link
       href={`/surah/${surah.number}`}
-      className="group animate-fade-in"
+      className="group animate-fade-in h-full w-full"
       style={{
         display: "block",
         textDecoration: "none",
@@ -40,11 +40,13 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
           backdrop-filter: blur(var(--card-blur));
           -webkit-backdrop-filter: blur(var(--card-blur));
           border-radius: 24px;
-          padding: 28px 24px;
           border: 1px solid var(--border-mid);
           cursor: pointer;
           overflow: hidden;
           box-shadow: var(--surah-base-shadow);
+          height: 100%;
+          display: flex;
+          flex-direction: column;
 
           /*
            * Dark-mode hover glitch fix:
@@ -106,7 +108,6 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
         }
 
         .arabic-name {
-          font-size: 32px;
           font-family: var(--font-arabic);
           color: var(--text-primary);
           text-align: right;
@@ -124,7 +125,6 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
         }
 
         .english-name {
-          font-size: 18px;
           font-weight: 600;
           color: var(--text-primary);
           margin-bottom: 4px;
@@ -139,7 +139,6 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
         }
 
         .surah-translation {
-          font-size: 13px;
           color: var(--text-muted);
           margin-bottom: 12px;
           transition: color 0.35s ease;
@@ -159,15 +158,12 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
         }
 
         .number-badge {
-          width: 40px;
-          height: 40px;
           border-radius: 14px;
           background: var(--sacred-gold-dim);
           border: 1px solid rgba(184, 134, 11, 0.28);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 14px;
           font-weight: 700;
           color: var(--sacred-gold);
           transition:
@@ -186,61 +182,42 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
       `}</style>
 
       <div className="surah-card">
-        <div
-          className="card-art-area"
-          style={{
-            margin: "-8px -8px 18px",
-            padding: "12px 12px 10px",
-            borderRadius: "18px",
-          }}
-        >
+        <div className="flex h-full flex-1 flex-col p-3 sm:p-4 lg:p-5 xl:p-6">
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "20px",
-            }}
+            className="card-art-area mb-4 rounded-2xl px-3 pb-2 pt-3 sm:mb-5"
+            style={{ margin: "-8px -8px 18px" }}
           >
-            <div className="number-badge">{surah.number}</div>
-            <span className={getRevelationColor(surah.revelationType)}>
-              {surah.revelationType}
-            </span>
+            <div className="mb-4 flex items-center justify-between sm:mb-5">
+              <div className="number-badge h-7 w-7 text-[11px] sm:h-8 sm:w-8 sm:text-xs md:h-8 md:w-8 md:text-xs">
+                {surah.number}
+              </div>
+              <span className={getRevelationColor(surah.revelationType)}>
+                {surah.revelationType}
+              </span>
+            </div>
+
+            <h3 className="arabic-name text-xl sm:text-2xl md:text-3xl lg:text-[30px] leading-relaxed">
+              {surah.name}
+            </h3>
           </div>
 
-          <div className="arabic-name">{surah.name}</div>
-        </div>
+          <div>
+            <h4 className="english-name text-sm sm:text-base md:text-lg">
+              {surah.englishName}
+            </h4>
+            <p className="surah-translation text-xs sm:text-sm line-clamp-2">
+              {surah.englishNameTranslation}
+            </p>
+          </div>
 
-        <div>
-          <div className="english-name">{surah.englishName}</div>
-          <div className="surah-translation">{surah.englishNameTranslation}</div>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: "16px",
-            paddingTop: "16px",
-            borderTop: "1px solid var(--border-subtle)",
-          }}
-        >
-          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-            {surah.numberOfAyahs} verses
-          </span>
-          <span
-            className="arrow-icon"
-            style={{
-              fontSize: "13px",
-              opacity: 0.95,
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            Read <span style={{ fontSize: "14px" }}>→</span>
-          </span>
+          <div className="mt-auto flex items-center justify-between border-t border-[var(--border-subtle)] pt-4">
+            <span className="text-xs text-[var(--text-muted)]">
+              {surah.numberOfAyahs} verses
+            </span>
+            <span className="arrow-icon flex items-center gap-1 text-xs opacity-95 sm:text-sm">
+              Read <span className="text-sm">→</span>
+            </span>
+          </div>
         </div>
       </div>
     </Link>

@@ -51,6 +51,16 @@ const runInBatches = async (items, batchSize, worker) => {
   return results;
 };
 
+const stripLeadingBismillah = (text) => {
+  if (!text) return text;
+  // Common Arabic bismillah string as returned by api.alquran.cloud (ar.alafasy)
+  // We only remove it when it is prepended to ayah 1 for surahs other than Al-Fatiha.
+  return text.replace(
+    /^\s*بِسْمِ\s+ٱ?للَّهِ\s+ٱلرَّحْمَٰنِ\s+ٱلرَّحِيمِ\s*/u,
+    "",
+  );
+};
+
 const main = async () => {
   await mkdir(OUTPUT_DIRECTORY, { recursive: true });
 
@@ -98,7 +108,10 @@ const main = async () => {
           numberInSurah: ayah.numberInSurah,
           juz: ayah.juz,
           page: ayah.page,
-          arabicText: ayah.text,
+          arabicText:
+            surahNumber !== 1 && surahNumber !== 9 && ayah.numberInSurah === 1
+              ? stripLeadingBismillah(ayah.text)
+              : ayah.text,
           translation: englishEdition.ayahs[index]?.text ?? "",
         })),
       };

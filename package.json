@@ -2,11 +2,15 @@
   "name": "quran-app",
   "private": true,
   "scripts": {
-    "postinstall": "npm install --prefix frontend",
-    "dev": "npm run dev --prefix frontend",
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
     "build": "npm run build --prefix frontend",
     "start": "npm run start --prefix frontend",
-    "install:all": "npm install --prefix frontend"
+    "install:all": "npm install --prefix frontend && npm install --prefix backend",
+    "seed:db": "npm run seed --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }

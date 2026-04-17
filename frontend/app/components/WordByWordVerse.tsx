@@ -3,7 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useSettings } from "@/context/SettingsContext";
-import { fetchVerseWords, type ArabicWordAudioToken } from "@/lib/wordAudio";
+import { fetchVerseWords, type VerseToken } from "@/lib/wordAudio";
+import {
+  VERSE_ARABIC_RECITATION_END,
+  VERSE_ARABIC_RECITATION_WORD,
+  clearVerseArabicWordCount,
+  setVerseArabicWordCount,
+  type VerseArabicRecitationEndDetail,
+  type VerseArabicRecitationWordDetail,
+} from "@/lib/verseRecitationBridge";
 
 interface WordByWordVerseProps {
   arabicText: string;
@@ -11,211 +19,203 @@ interface WordByWordVerseProps {
   verseNumber: number;
 }
 
-type ActiveWord =
-  | {
-      type: "ar";
-      position: number;
-    }
-  | null;
+const HOVER_DELAY_MS = 120;
 
-const HOVER_PLAY_DELAY_MS = 120;
-
-const splitArabicWords = (text: string) =>
-  text
-    .split(/\s+/)
-    .map((word, index) => ({
-      id: index + 1,
-      position: index + 1,
-      text: word.trim(),
-      audioUrl: null,
-    }))
-    .filter((word) => word.text.length > 0);
-
-const WordByWordVerse = ({
-  arabicText,
-  surahNumber,
-  verseNumber,
-}: WordByWordVerseProps) => {
+const WordByWordVerse = ({ arabicText, surahNumber, verseNumber }: WordByWordVerseProps) => {
   const { settings } = useSettings();
-  const [arabicWords, setArabicWords] = useState<ArabicWordAudioToken[]>(() =>
-    splitArabicWords(arabicText),
-  );
-  const [activeWord, setActiveWord] = useState<ActiveWord>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+
+  const [tokens, setTokens] = useState<VerseToken[] | null>(null);
+  const [activePosition, setActivePosition] = useState<number | null>(null);
+  /** Full-verse MP3 (VerseAudio) — proportional word highlight while reciting */
+  const [recitationTracePosition, setRecitationTracePosition] = useState<number | null>(null);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const hoverTimeoutRef = useRef<number | null>(null);
-  const hasLoadedArabicAudioRef = useRef(false);
+  const hoverTimer = useRef<number | null>(null);
 
-  const clearHoverTimeout = () => {
-    if (hoverTimeoutRef.current !== null) {
-      window.clearTimeout(hoverTimeoutRef.current);
-      hoverTimeoutRef.current = null;
+  const stopPlayback = () => {
+    if (hoverTimer.current !== null) {
+      window.clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
     }
-  };
-
-  const stopCurrentPlayback = () => {
-    clearHoverTimeout();
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-
+    audioRef.current?.pause();
+    audioRef.current = null;
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
-
-    setIsPlaying(false);
-    setActiveWord(null);
+    setActivePosition(null);
   };
 
-  useEffect(
-    () => () => {
-      stopCurrentPlayback();
-    },
-    [],
-  );
+  useEffect(() => () => stopPlayback(), []);
 
   useEffect(() => {
-    const onStop = () => stopCurrentPlayback();
-    window.addEventListener("surahflow:stop-audio", onStop);
-    return () => window.removeEventListener("surahflow:stop-audio", onStop);
+    const stop = () => stopPlayback();
+    window.addEventListener("surahflow:stop-audio", stop);
+    return () => window.removeEventListener("surahflow:stop-audio", stop);
   }, []);
 
   useEffect(() => {
-    hasLoadedArabicAudioRef.current = false;
-    setArabicWords(splitArabicWords(arabicText));
-    setActiveWord(null);
-    setIsPlaying(false);
-  }, [arabicText, surahNumber, verseNumber]);
+    setTokens(null);
+    stopPlayback();
+    setRecitationTracePosition(null);
+    let cancelled = false;
+    void fetchVerseWords(surahNumber, verseNumber).then((t) => {
+      if (!cancelled) setTokens(t);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [surahNumber, verseNumber]);
 
-  const ensureArabicWordsLoaded = async () => {
-    if (hasLoadedArabicAudioRef.current) {
-      return arabicWords;
+  useEffect(() => {
+    if (!tokens?.length) {
+      clearVerseArabicWordCount(surahNumber, verseNumber);
+      return;
     }
+    const n = tokens.filter((t) => t.isWord).length;
+    setVerseArabicWordCount(surahNumber, verseNumber, n);
+    return () => clearVerseArabicWordCount(surahNumber, verseNumber);
+  }, [tokens, surahNumber, verseNumber]);
 
-    const words = await fetchVerseWords(surahNumber, verseNumber);
-    hasLoadedArabicAudioRef.current = true;
+  useEffect(() => {
+    const onWord = (e: Event) => {
+      const ev = e as CustomEvent<VerseArabicRecitationWordDetail>;
+      const d = ev.detail;
+      if (d.surahNumber !== surahNumber || d.verseNumber !== verseNumber) return;
+      setRecitationTracePosition(d.wordPosition);
+    };
+    const onEnd = (e: Event) => {
+      const ev = e as CustomEvent<VerseArabicRecitationEndDetail>;
+      const d = ev.detail;
+      if (d.surahNumber !== surahNumber || d.verseNumber !== verseNumber) return;
+      setRecitationTracePosition(null);
+    };
+    window.addEventListener(VERSE_ARABIC_RECITATION_WORD, onWord);
+    window.addEventListener(VERSE_ARABIC_RECITATION_END, onEnd);
+    return () => {
+      window.removeEventListener(VERSE_ARABIC_RECITATION_WORD, onWord);
+      window.removeEventListener(VERSE_ARABIC_RECITATION_END, onEnd);
+    };
+  }, [surahNumber, verseNumber]);
 
-    if (words.length > 0) {
-      setArabicWords(words);
-      return words;
-    }
-
-    return arabicWords;
-  };
-
-  const speakWithSynthesis = (text: string, nextActiveWord: ActiveWord) => {
+  const speakFallback = (text: string, position: number) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-      setIsPlaying(false);
-      setActiveWord(null);
+      setActivePosition(null);
       return;
     }
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "ar-SA";
-    utterance.rate = settings.pronunciationSpeed;
-    utterance.pitch = 1;
-    utterance.onend = () => {
-      setIsPlaying(false);
-      setActiveWord(null);
-    };
-    utterance.onerror = () => {
-      setIsPlaying(false);
-      setActiveWord(null);
-    };
-
-    setActiveWord(nextActiveWord);
-    setIsPlaying(true);
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "ar-SA";
+    u.rate = settings.pronunciationSpeed;
+    u.pitch = 1;
+    u.onend = () => setActivePosition(null);
+    u.onerror = () => setActivePosition(null);
+    setActivePosition(position);
     window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.speak(u);
   };
 
-  const playArabicWord = async (word: ArabicWordAudioToken) => {
+  const playToken = (token: VerseToken) => {
     if (!settings.arabicPronunciationEnabled) return;
-    if (isPlaying && activeWord?.type === "ar" && activeWord.position === word.position) return;
+    if (!token.isWord || token.position === null) return;
+    if (activePosition === token.position) return;
 
-    const loadedWords = await ensureArabicWordsLoaded();
-    const resolvedWord =
-      loadedWords.find((w) => w.position === word.position) ?? word;
+    stopPlayback();
+    setActivePosition(token.position);
 
-    stopCurrentPlayback();
-
-    const nextActiveWord: ActiveWord = { type: "ar", position: word.position };
-    setActiveWord(nextActiveWord);
-    setIsPlaying(true);
-
-    if (!resolvedWord.audioUrl) {
-      speakWithSynthesis(resolvedWord.text, nextActiveWord);
+    if (!token.audioUrl) {
+      speakFallback(token.text, token.position);
       return;
     }
 
-    const audio = new Audio(resolvedWord.audioUrl);
+    const audio = new Audio(token.audioUrl);
+    audio.preload = "auto";
     audio.playbackRate = settings.pronunciationSpeed;
     audioRef.current = audio;
     audio.onended = () => {
-      setIsPlaying(false);
-      setActiveWord(null);
+      setActivePosition(null);
       audioRef.current = null;
     };
     audio.onerror = () => {
       audioRef.current = null;
-      speakWithSynthesis(resolvedWord.text, nextActiveWord);
+      speakFallback(token.text, token.position!);
     };
-
     audio.play().catch(() => {
       audioRef.current = null;
-      speakWithSynthesis(resolvedWord.text, nextActiveWord);
+      speakFallback(token.text, token.position!);
     });
   };
 
   const shouldEnableHover =
-    settings.pronunciationMode === "hover" ||
-    settings.pronunciationMode === "click-and-hover";
+    settings.pronunciationMode === "hover" || settings.pronunciationMode === "click-and-hover";
+  const shouldClick =
+    settings.pronunciationMode === "click" || settings.pronunciationMode === "click-and-hover";
 
-  const shouldEnableClick =
-    settings.pronunciationMode === "click" ||
-    settings.pronunciationMode === "click-and-hover";
-
-  const scheduleHoverPlayback = (
-    nextActiveWord: Exclude<ActiveWord, null>,
-    callback: () => void,
-  ) => {
+  const scheduleHover = (token: VerseToken) => {
     if (!shouldEnableHover) return;
-    if (
-      activeWord?.type === nextActiveWord.type &&
-      activeWord.position === nextActiveWord.position &&
-      isPlaying
-    ) {
-      return;
-    }
-    clearHoverTimeout();
-    hoverTimeoutRef.current = window.setTimeout(callback, HOVER_PLAY_DELAY_MS);
+    if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current);
+    hoverTimer.current = window.setTimeout(() => playToken(token), HOVER_DELAY_MS);
   };
+
+  const clearHoverTimer = () => {
+    if (hoverTimer.current !== null) {
+      window.clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
+    }
+  };
+
+  if (tokens === null) {
+    return (
+      <div className="word-by-word-verse">
+        <p dir="rtl" className="arabic-text">
+          {arabicText}
+        </p>
+      </div>
+    );
+  }
+
+  if (tokens.length === 0) {
+    return (
+      <div className="word-by-word-verse">
+        <p dir="rtl" className="arabic-text">
+          {arabicText}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="word-by-word-verse">
       <div className="word-row word-row--arabic" dir="rtl">
-        {arabicWords.map((word) => {
-          const isActive =
-            activeWord?.type === "ar" && activeWord.position === word.position;
+        {tokens.map((token, idx) => {
+          if (!token.isWord) {
+            return (
+              <span
+                key={`${surahNumber}-${verseNumber}-mark-${token.id}-${idx}`}
+                className="word-token word-token--arabic word-token--mark"
+                aria-hidden="true"
+              >
+                <span className="word-token__text">{token.text}</span>
+              </span>
+            );
+          }
+
+          const isActive = activePosition === token.position;
+          const isRecitationTrace =
+            recitationTracePosition !== null && recitationTracePosition === token.position;
+
           return (
             <button
-              key={`${surahNumber}-${verseNumber}-ar-${word.position}`}
-              aria-label={`Play Arabic word ${word.text}`}
-              className={`word-token word-token--arabic${isActive ? " is-active" : ""}`}
+              key={`${surahNumber}-${verseNumber}-ar-${token.id}-${idx}`}
               type="button"
+              className={`word-token word-token--arabic${isActive ? " is-active" : ""}${isRecitationTrace ? " word-token--recitation-trace" : ""}`}
+              aria-label={`Play ${token.text}`}
               onClick={() => {
-                if (shouldEnableClick) void playArabicWord(word);
+                if (!settings.arabicPronunciationEnabled) return;
+                if (shouldClick) playToken(token);
               }}
-              onMouseEnter={() =>
-                scheduleHoverPlayback({ type: "ar", position: word.position }, () =>
-                  void playArabicWord(word),
-                )
-              }
-              onMouseLeave={clearHoverTimeout}
+              onMouseEnter={() => scheduleHover(token)}
+              onMouseLeave={clearHoverTimer}
             >
-              <span className="word-token__text">{word.text}</span>
+              <span className="word-token__text">{token.text}</span>
               <span className="word-token__icon" aria-hidden="true">
                 {isActive ? "Playing" : "Speak"}
               </span>
@@ -228,4 +228,3 @@ const WordByWordVerse = ({
 };
 
 export default WordByWordVerse;
-
