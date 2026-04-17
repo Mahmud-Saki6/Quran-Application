@@ -2,6 +2,7 @@
   "name": "quran-app",
   "private": true,
   "scripts": {
+    "postinstall": "npm install --prefix frontend",
     "dev": "npm run dev --prefix frontend",
     "dev:frontend": "npm run dev --prefix frontend",
     "build": "npm run build --prefix frontend",
