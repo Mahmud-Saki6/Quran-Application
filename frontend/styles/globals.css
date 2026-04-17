@@ -71,6 +71,8 @@
 
   --glass-panel: rgba(255, 252, 245, 0.72);
   --glass-shadow: 0 4px 24px rgba(44, 36, 24, 0.06);
+  --glass-blur: 14px;
+  --card-blur: 12px;
 
   --glass-btn: rgba(255, 248, 235, 0.85);
   --glass-btn-hover-ring: var(--sacred-gold-dim);
@@ -104,7 +106,6 @@
 html[data-theme="dark"] {
   --bg-deep: #0f1724;
   --bg-surface: #1a2332;
-  /* Slightly more opaque so hover doesn't blow out */
   --bg-card: rgba(255, 255, 255, 0.07);
   --bg-card-hover: rgba(255, 255, 255, 0.11);
 
@@ -161,6 +162,13 @@ html[data-theme="dark"] {
 
   --glass-panel: rgba(255, 255, 255, 0.07);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  /*
+   * Dark-mode hover glitch fix:
+   * backdrop-filter on many grid cards can cause compositor tiling artifacts.
+   * We disable card blur in dark mode and rely on opaque glass colors instead.
+   */
+  --glass-blur: 0px;
+  --card-blur: 0px;
 
   --glass-btn: rgba(255, 255, 255, 0.06);
   --glass-btn-hover-ring: rgba(99, 211, 178, 0.14);
@@ -343,57 +351,58 @@ textarea::placeholder {
   /* ─── Glass primitives ─────────────────────────────────────────────── */
   .glass {
     background: var(--glass-panel);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
     border: 1px solid var(--border-subtle);
     box-shadow: var(--glass-shadow);
   }
 
   /* ─── Surah / main card ────────────────────────────────────────────── */
   /*
-   * KEY FIX: The original .glass-card:hover used color-mix() on --sacred-gold
-   * for the box-shadow which, in dark mode (where --sacred-gold = #63d3b2),
-   * produced a strong teal-colored glow that bled into the card's art area
-   * making it look like a solid fill. We now use dedicated --surah-hover-shadow
-   * vars that are correctly tuned per theme with no color-mix() surprises.
+   * FIX: The original .glass-card:hover used scale(1.012) which caused the
+   * card to grow and push neighboring cards in the grid, making them shift
+   * or animate unintentionally.
    *
-   * We also deliberately do NOT change the background on hover — only
-   * border, transform, and shadow — so card content always stays legible.
+   * The fix:
+   *   1. Remove scale() — use translateY only. The card visually lifts but
+   *      its layout box stays exactly the same size, so neighbors never move.
+   *   2. Add will-change: transform — promotes the card to its own compositor
+   *      layer so GPU handles the animation without touching the main thread
+   *      or triggering reflow of sibling elements.
+   *   3. isolation: isolate on the wrapper Link element (done in SurahCard.tsx)
+   *      creates a new stacking context, fully containing the card's z-index
+   *      changes and preventing any bleed to sibling cards.
    */
   .glass-card {
     background: var(--bg-card);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--border-mid);
     border-radius: 24px;
     box-shadow: var(--surah-base-shadow);
+    will-change: box-shadow, border-color;
     transition:
-      transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1),
       border-color 0.22s ease;
     animation: fadeInScale 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    will-change: transform, box-shadow;
+    isolation: isolate;
+    contain: paint;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     overflow: hidden;
   }
 
   .glass-card:hover {
     border-color: var(--card-border-hover);
-    transform: translateY(-5px) scale(1.012);
     box-shadow: var(--surah-hover-shadow);
   }
 
-  /* Active/press feedback */
+  /* Active/press feedback — also scale-free */
   .glass-card:active {
-    transform: translateY(-2px) scale(1.005);
     transition-duration: 0.12s;
   }
 
   /* ─── Card art / decorative top section ───────────────────────────── */
-  /*
-   * If you have a decorative Arabic text banner area at the top of each card,
-   * apply .card-art-area to it. This keeps its background consistent and
-   * prevents the hover from making it look like a broken image.
-   */
   .card-art-area {
     background: var(--card-art-bg);
     transition: background 0.32s ease;

@@ -22,6 +22,14 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
         display: "block",
         textDecoration: "none",
         animationDelay: `${index * 30}ms`,
+        /*
+         * FIX: contain the stacking context so hover transforms on THIS card
+         * never affect sibling layout. isolation:isolate + will-change:transform
+         * promotes the element to its own compositor layer — transforms happen
+         * entirely on the GPU and never trigger a reflow of adjacent cards.
+         */
+        isolation: "isolate",
+        willChange: "transform",
       }}
     >
       <style>{`
@@ -29,19 +37,28 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
           position: relative;
           z-index: 0;
           background: var(--bg-card);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(var(--card-blur));
+          -webkit-backdrop-filter: blur(var(--card-blur));
           border-radius: 24px;
           padding: 28px 24px;
           border: 1px solid var(--border-mid);
-          transition:
-            background 0.25s ease,
-            border-color 0.25s ease,
-            box-shadow 0.25s ease,
-            filter 0.25s ease;
           cursor: pointer;
           overflow: hidden;
           box-shadow: var(--surah-base-shadow);
+
+          /*
+           * Dark-mode hover glitch fix:
+           * backdrop-filter + hover transform in a dense grid can trigger
+           * compositor tiling artifacts where nearby cards briefly show “blocks”.
+           * We avoid transforms on the blurred element and contain paint instead.
+           */
+          contain: paint;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          will-change: box-shadow, border-color;
+          transition:
+            box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+            border-color 0.22s ease;
         }
 
         .surah-card > * {
@@ -71,13 +88,21 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
         }
 
         .surah-card:hover {
-          z-index: 10;
+          /*
+           * No transforms here (prevents backdrop-filter compositor artifacts).
+           */
           box-shadow: var(--surah-hover-shadow);
           border-color: var(--card-border-hover);
+          z-index: 10;
         }
 
         .surah-card:hover::before {
           opacity: 1;
+        }
+
+        /* Active/press feedback — also scale-free */
+        .surah-card:active {
+          transition-duration: 0.12s;
         }
 
         .arabic-name {
@@ -155,7 +180,7 @@ const SurahCard = ({ surah, index = 0 }: SurahCardProps) => {
         .surah-card:hover .number-badge {
           background: rgba(184, 134, 11, 0.15);
           border-color: var(--sacred-gold-light);
-          transform: scale(1.06);
+          transform: scale(1.04);
           box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.12);
         }
       `}</style>
