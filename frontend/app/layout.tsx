@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 
+import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import SettingsSidebar from "@/app/components/SettingsSidebar";
 import { SettingsProvider } from "@/context/SettingsContext";
@@ -33,16 +34,20 @@ const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
           dangerouslySetInnerHTML={{ __html: PREHYDRATION_SCRIPT }}
         />
       </head>
-      <body className="relative overflow-x-hidden" suppressHydrationWarning>
+      <body
+        className="relative flex min-h-dvh flex-col overflow-x-hidden"
+        suppressHydrationWarning
+      >
         <ThemeProvider>
           <SettingsProvider>
             <Suspense fallback={<div className="h-28" />}>
               <Header />
             </Suspense>
             <SettingsSidebar />
-            <main className="relative z-[1] mx-auto max-w-[1400px] px-3 pb-10 pt-20 sm:px-4 md:px-6 lg:px-8">
+            <main className="relative z-[1] mx-auto w-full max-w-[1400px] flex-1 px-3 pb-8 pt-20 sm:px-4 md:px-6 lg:px-8">
               {children}
             </main>
+            <Footer />
           </SettingsProvider>
         </ThemeProvider>
       </body>
