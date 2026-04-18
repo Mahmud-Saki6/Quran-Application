@@ -160,7 +160,7 @@ const Footer = () => {
         </div>
 
         <p className="app-footer__copyright-row">
-        © 2026 SurahFlow — Read, reflect, and find peace in His words.
+        © 2026 SurahFlow — Gazi Mahmud Sakib
         </p>
       </div>
     </footer>

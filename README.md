@@ -134,7 +134,3 @@ The static frontend primarily uses generated JSON; these routes support parity, 
 - **Word-level data and audio URLs** are fetched in the browser from **Quran.com**’s public API where applicable.
 
 ---
-
-## License
-
-Add a `LICENSE` file and update this section for your distribution terms.
